@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Gestão & PDV</title>
+  <title>Sistema de Gestão & PDV - Loja de Roupas</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- React & ReactDOM -->
@@ -27,7 +27,6 @@
     function App() {
       // 1. ESTADOS DE LICENÇA (CONTROLE SEU)
       const [licenseExpiry, setLicenseExpiry] = useState(() => {
-        // Por padrão, 30 dias a partir do primeiro acesso
         const stored = localStorage.getItem('app_license_expiry');
         if (stored) return stored;
         const d = new Date();
@@ -109,7 +108,7 @@
       // Sincronização Local
       useEffect(() => {
         localStorage.setItem('app_products', JSON.stringify(products));
-[25/09/2026 11:11] Sandro Luz: }, [products]);
+      }, [products]);
 
       useEffect(() => {
         localStorage.setItem('app_store_config', JSON.stringify(storeConfig));
@@ -154,7 +153,7 @@
           barcode: productForm.barcode || Math.floor(100000 + Math.random() * 900000).toString(),
           costPrice: parseFloat(productForm.costPrice) || 0,
           retailPrice: parseFloat(productForm.retailPrice) || 0,
-          fixedPrice: parseFloat(productForm.fixedPrice)  parseFloat(productForm.retailPrice)  0,
+          fixedPrice: parseFloat(productForm.fixedPrice) || parseFloat(productForm.retailPrice) || 0,
           stock: parseInt(productForm.stock) || 1,
           image: productForm.image || 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=200'
         };
@@ -211,7 +210,7 @@
         return (
           <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 text-center">
             <div className="bg-slate-800 p-8 rounded-2xl max-w-md w-full border border-slate-700 shadow-2xl space-y-5">
-[25/09/2026 11:11] Sandro Luz: <div className="w-16 h-16 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">🔒</div>
+              <div className="w-16 h-16 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">🔒</div>
               <h2 className="text-2xl font-bold">Licença Mensal Vencida</h2>
               <p className="text-slate-400 text-sm leading-relaxed">
                 O período de utilização do sistema expirou em <span className="text-slate-200 font-semibold">{licenseExpiry}</span>. Para continuar registrando vendas e controlando seu estoque, renove sua mensalidade.
@@ -285,8 +284,8 @@
           {/* TOPO DA LOJA */}
           <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 shadow-sm">
             <div className="flex items-center gap-3">
-              <img
-[25/09/2026 11:11] Sandro Luz: src={storeConfig.logoUrl} 
+              <img 
+                src={storeConfig.logoUrl} 
                 alt="Logo" 
                 className="w-11 h-11 rounded-full object-cover border border-slate-200"
                 onError={(e) => { e.target.src = 'https://via.placeholder.com/80?text=Loja'; }}
@@ -365,7 +364,7 @@
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {filteredProducts.map(p => (
-[25/09/2026 11:11] Sandro Luz: <div key={p.id} className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                      <div key={p.id} className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                         <img 
                           src={p.image} 
                           alt={p.name} 
@@ -430,7 +429,7 @@
                     <div>
                       <label className="text-xs font-bold text-slate-700 block mb-1.5">Pagamento:</label>
                       <div className="grid grid-cols-3 gap-2">
-[25/09/2026 11:11] Sandro Luz: {['pix', 'credit_card', 'money'].map(m => (
+                        {['pix', 'credit_card', 'money'].map(m => (
                           <button
                             key={m}
                             type="button"
@@ -508,8 +507,7 @@
                         placeholder="35.00" 
                         value={productForm.costPrice}
                         onChange={e => setProductForm({ ...productForm, costPrice: e.target.value })}
-                        className="w-full mt-1 p-2.
-[25/09/2026 11:11] Sandro Luz: 5 border border-slate-300 rounded-lg text-sm"
+                        className="w-full mt-1 p-2.5 border border-slate-300 rounded-lg text-sm"
                       />
                     </div>
                     <div>
@@ -589,7 +587,7 @@
                           <tr key={p.id} className="hover:bg-slate-50">
                             <td className="p-2.5">
                               <img src={p.image} className="w-10 h-10 object-cover rounded" alt={p.name} />
-[25/09/2026 11:11] Sandro Luz: </td>
+                            </td>
                             <td className="p-2.5 font-bold text-slate-800">
                               {p.name}
                               <span className="block font-normal text-slate-400 font-mono text-[10px]">Cód: {p.barcode}</span>
@@ -669,7 +667,7 @@
                 </div>
 
                 <div>
-[25/09/2026 11:11] Sandro Luz: <label className="text-xs font-bold text-slate-700">Chave Pix da Loja (Para clientes pagarem)</label>
+                  <label className="text-xs font-bold text-slate-700">Chave Pix da Loja (Para clientes pagarem)</label>
                   <input 
                     type="text" 
                     value={storeConfig.pixKey}
