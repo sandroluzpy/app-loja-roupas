@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Gestão & PDV - Loja de Roupas</title>
+  <title>Sistema de Gestão & Caixa Livre</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- React & ReactDOM -->
@@ -48,19 +48,19 @@
       const [enteredPin, setEnteredPin] = useState('');
       const [isMasterAuthenticated, setIsMasterAuthenticated] = useState(false);
 
-      // 2. DADOS DA LOJA (O CLIENTE EDITA)
+      // 2. DADOS DA LOJA (PERSONALIZÁVEIS)
       const [storeConfig, setStoreConfig] = useState(() => {
         const saved = localStorage.getItem('app_store_config');
         return saved ? JSON.parse(saved) : {
-          name: 'Moda & Estilo',
+          name: 'Sua Loja de Roupas',
           phone: '(11) 99999-0000',
-          email: 'loja@exemplo.com',
+          email: 'contato@sualoja.com',
           logoUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=150',
           pixKey: '11999990000'
         };
       });
 
-      // 3. PRODUTOS E ESTOQUE (O CLIENTE CADASTRA E GERENCIA)
+      // 3. PRODUTOS E ESTOQUE
       const [products, setProducts] = useState(() => {
         const saved = localStorage.getItem('app_products');
         return saved ? JSON.parse(saved) : [
@@ -87,8 +87,8 @@
         ];
       });
 
-      // Navegação do Lojista
-      const [activeTab, setActiveTab] = useState('pdv'); // pdv, inventory, settings
+      // Navegação
+      const [activeTab, setActiveTab] = useState('pdv'); // pdv (Caixa Livre), inventory, settings
       const [cart, setCart] = useState([]);
       const [paymentMethod, setPaymentMethod] = useState('pix');
       const [searchQuery, setSearchQuery] = useState('');
@@ -139,7 +139,31 @@
         alert(`Licença prorrogada até ${newDate}!`);
       };
 
-      // Ações do Lojista (Cliente)
+      // Upload de Foto da Loja via Arquivo local
+      const handleLogoUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setStoreConfig(prev => ({ ...prev, logoUrl: reader.result }));
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+
+      // Upload de Foto da Peça via Arquivo local
+      const handleProductImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setProductForm(prev => ({ ...prev, image: reader.result }));
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+
+      // Ações de Produtos
       const handleCreateProduct = (e) => {
         e.preventDefault();
         if (!productForm.name || !productForm.retailPrice) {
@@ -160,7 +184,7 @@
 
         setProducts([newProd, ...products]);
         setProductForm({ name: '', barcode: '', costPrice: '', retailPrice: '', fixedPrice: '', stock: '', image: '' });
-        alert('Produto cadastrado com sucesso no estoque!');
+        alert('Produto cadastrado com sucesso!');
       };
 
       const addToCart = (product) => {
@@ -213,14 +237,13 @@
               <div className="w-16 h-16 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">🔒</div>
               <h2 className="text-2xl font-bold">Licença Mensal Vencida</h2>
               <p className="text-slate-400 text-sm leading-relaxed">
-                O período de utilização do sistema expirou em <span className="text-slate-200 font-semibold">{licenseExpiry}</span>. Para continuar registrando vendas e controlando seu estoque, renove sua mensalidade.
+                O período de utilização do sistema expirou em <span className="text-slate-200 font-semibold">{licenseExpiry}</span>. Para continuar registrando vendas no Caixa Livre, regularize sua mensalidade.
               </p>
               <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-700 text-xs text-left space-y-1">
                 <p className="text-slate-400">Loja: <strong className="text-white">{storeConfig.name}</strong></p>
                 <p className="text-slate-400">Status: <span className="text-rose-400 font-semibold">Acesso Suspenso</span></p>
               </div>
 
-              {/* Botão sutil para você desbloquear */}
               <button 
                 onClick={() => setShowMasterModal(true)} 
                 className="text-xs text-slate-500 hover:text-slate-300 underline block mx-auto pt-2"
@@ -229,7 +252,6 @@
               </button>
             </div>
 
-            {/* MODAL MASTER DENTRO DO BLOQUEIO */}
             {showMasterModal && (
               <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
                 <div className="bg-slate-800 p-6 rounded-xl border border-slate-600 max-w-sm w-full space-y-4 text-left">
@@ -243,7 +265,7 @@
                         placeholder="Senha master..." 
                         value={enteredPin}
                         onChange={e => setEnteredPin(e.target.value)}
-                        className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-sm text-white"
+                        className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-sm text-white outline-none"
                         autoFocus
                       />
                       <button type="submit" className="w-full py-2 bg-indigo-600 text-white font-bold rounded text-xs hover:bg-indigo-500">
@@ -278,7 +300,6 @@
         );
       }
 
-      // TELA NORMAL DA LOJA (USO DO SEU CLIENTE)
       return (
         <div className="min-h-screen flex flex-col">
           {/* TOPO DA LOJA */}
@@ -286,12 +307,12 @@
             <div className="flex items-center gap-3">
               <img 
                 src={storeConfig.logoUrl} 
-                alt="Logo" 
-                className="w-11 h-11 rounded-full object-cover border border-slate-200"
-                onError={(e) => { e.target.src = 'https://via.placeholder.com/80?text=Loja'; }}
+                alt="Logo da Loja" 
+                className="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm"
+                onError={(e) => { e.target.src = 'https://via.placeholder.com/80?text=Logo'; }}
               />
               <div>
-                <h1 className="font-bold text-lg text-slate-900 leading-tight">{storeConfig.name}</h1>
+                <h1 className="font-extrabold text-xl text-slate-900 leading-tight">{storeConfig.name}</h1>
                 <p className="text-xs text-slate-500">{storeConfig.phone} • {storeConfig.email}</p>
               </div>
             </div>
@@ -300,7 +321,6 @@
               <span className="text-xs bg-emerald-50 text-emerald-700 font-semibold px-2.5 py-1 rounded-full border border-emerald-200">
                 Licença ativa até: {licenseExpiry}
               </span>
-              {/* Botão discreto para você acessar o Master */}
               <button 
                 onClick={() => {
                   setIsMasterAuthenticated(false);
@@ -314,48 +334,49 @@
             </div>
           </header>
 
-          {/* MENU DE NAVEGAÇÃO DO CLIENTE */}
+          {/* MENU DE NAVEGAÇÃO */}
           <nav className="bg-white border-b border-slate-200 px-6 flex space-x-6 text-sm">
             <button 
               onClick={() => setActiveTab('pdv')} 
-              className={`py-3.5 border-b-2 font-semibold transition-all ${activeTab === 'pdv' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+              className={`py-3.5 border-b-2 font-bold transition-all ${activeTab === 'pdv' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
             >
-              🛍️ Frente de Caixa (PDV)
+              🛍️ Caixa Livre
             </button>
             <button 
               onClick={() => setActiveTab('inventory')} 
-              className={`py-3.5 border-b-2 font-semibold transition-all ${activeTab === 'inventory' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+              className={`py-3.5 border-b-2 font-bold transition-all ${activeTab === 'inventory' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
             >
-              📦 Estoque & Cadastrar Peças
+              📦 Estoque & Peças
             </button>
             <button 
               onClick={() => setActiveTab('settings')} 
-              className={`py-3.5 border-b-2 font-semibold transition-all ${activeTab === 'settings' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+              className={`py-3.5 border-b-2 font-bold transition-all ${activeTab === 'settings' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
             >
               ⚙️ Dados da Minha Loja
             </button>
           </nav>
 
-          {/* ÁREA PRINCIPAL */}
+          {/* CONTEÚDO PRINCIPAL */}
           <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
             {saleSuccess && (
-              <div className="mb-6 p-4 bg-emerald-500 text-white rounded-xl shadow-lg flex items-center justify-between animate-pulse">
-                <span className="font-bold text-sm">✅ Venda concluída e baixada no estoque com sucesso!</span>
-                <span className="text-xs bg-emerald-600 px-2 py-1 rounded">Pago via {paymentMethod.toUpperCase()}</span>
+              <div className="mb-6 p-4 bg-emerald-600 text-white rounded-xl shadow-lg flex items-center justify-between animate-pulse">
+                <span className="font-bold text-sm">✅ Venda concluída e baixada com sucesso no Caixa Livre!</span>
+                <span className="text-xs bg-emerald-700 px-2.5 py-1 rounded">Pago via {paymentMethod.toUpperCase()}</span>
               </div>
             )}
 
-            {/* ABA 1: PDV / CAIXA */}
+            {/* ABA 1: CAIXA LIVRE */}
             {activeTab === 'pdv' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-4">
                   <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2">
+                    <span className="text-slate-400 pl-1 text-sm">🔍</span>
                     <input 
                       type="text" 
                       placeholder="Pesquisar por nome ou código de barras..." 
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-3 py-2 text-sm outline-none"
+                      className="w-full px-2 py-1 text-sm outline-none bg-transparent"
                     />
                     {searchQuery && (
                       <button onClick={() => setSearchQuery('')} className="text-xs text-slate-400 hover:text-slate-600">Limpar</button>
@@ -375,7 +396,7 @@
                           <h3 className="font-bold text-sm text-slate-900 leading-tight">{p.name}</h3>
                           <p className="text-xs text-slate-400 font-mono">Cód: {p.barcode}</p>
                           <div className="flex items-baseline justify-between mt-1">
-                            <span className="text-indigo-600 font-extrabold text-base">
+                            <span className="text-emerald-700 font-black text-base">
                               R$ {(p.fixedPrice || p.retailPrice).toFixed(2)}
                             </span>
                             <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${p.stock > 3 ? 'bg-slate-100 text-slate-700' : 'bg-rose-100 text-rose-700'}`}>
@@ -385,7 +406,7 @@
                         </div>
                         <button 
                           onClick={() => addToCart(p)}
-                          className="mt-3 w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs shadow transition-colors"
+                          className="mt-3 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs shadow transition-colors"
                         >
                           + Adicionar à Venda
                         </button>
@@ -394,10 +415,10 @@
                   </div>
                 </div>
 
-                {/* Resumo do Caixa */}
+                {/* Resumo do Caixa Livre */}
                 <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-fit space-y-5 sticky top-24">
                   <h2 className="font-bold text-base text-slate-900 flex items-center justify-between">
-                    <span>🛒 Caixa Atual</span>
+                    <span className="flex items-center gap-1.5">🛍️ Caixa Livre</span>
                     <span className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-600">{cart.length} itens</span>
                   </h2>
 
@@ -422,12 +443,12 @@
 
                   <div className="border-t border-slate-200 pt-3 space-y-3">
                     <div className="flex justify-between items-center text-sm font-semibold">
-                      <span className="text-slate-600">Total:</span>
+                      <span className="text-slate-600">Total da Venda:</span>
                       <span className="text-xl font-extrabold text-slate-900">R$ {totalCart.toFixed(2)}</span>
                     </div>
 
                     <div>
-                      <label className="text-xs font-bold text-slate-700 block mb-1.5">Pagamento:</label>
+                      <label className="text-xs font-bold text-slate-700 block mb-1.5">Forma de Pagamento:</label>
                       <div className="grid grid-cols-3 gap-2">
                         {['pix', 'credit_card', 'money'].map(m => (
                           <button
@@ -436,7 +457,7 @@
                             onClick={() => setPaymentMethod(m)}
                             className={`py-2 text-xs font-bold rounded-lg border text-center transition-all ${
                               paymentMethod === m 
-                                ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
                                 : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                             }`}
                           >
@@ -462,7 +483,7 @@
                           : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                       }`}
                     >
-                      Concluir Venda (Baixar Estoque)
+                      Finalizar Venda
                     </button>
                   </div>
                 </div>
@@ -549,13 +570,19 @@
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-700">Link da Imagem da Peça</label>
+                    <label className="text-xs font-bold text-slate-700">Foto da Roupa</label>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handleProductImageUpload}
+                      className="w-full mt-1 text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 hover:file:bg-slate-200"
+                    />
                     <input 
                       type="url" 
-                      placeholder="https://..." 
+                      placeholder="Ou cole o link da foto (https://...)" 
                       value={productForm.image}
                       onChange={e => setProductForm({ ...productForm, image: e.target.value })}
-                      className="w-full mt-1 p-2.5 border border-slate-300 rounded-lg text-sm"
+                      className="w-full mt-1.5 p-2 border border-slate-300 rounded-lg text-xs"
                     />
                   </div>
 
@@ -593,7 +620,7 @@
                               <span className="block font-normal text-slate-400 font-mono text-[10px]">Cód: {p.barcode}</span>
                             </td>
                             <td className="p-2.5 text-slate-500">R$ {p.costPrice.toFixed(2)}</td>
-                            <td className="p-2.5 font-bold text-indigo-600">R$ {(p.fixedPrice || p.retailPrice).toFixed(2)}</td>
+                            <td className="p-2.5 font-bold text-emerald-700">R$ {(p.fixedPrice || p.retailPrice).toFixed(2)}</td>
                             <td className="p-2.5">
                               <span className={`px-2 py-0.5 rounded font-bold ${p.stock > 0 ? 'bg-slate-100 text-slate-700' : 'bg-rose-100 text-rose-700'}`}>
                                 {p.stock} un
@@ -620,10 +647,10 @@
               </div>
             )}
 
-            {/* ABA 3: CONFIGURAÇÕES DA LOJA */}
+            {/* ABA 3: CONFIGURAÇÕES DA LOJA (PERSONALIZAÇÃO) */}
             {activeTab === 'settings' && (
               <div className="max-w-xl mx-auto bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                <h3 className="font-bold text-lg text-slate-900 border-b pb-3">Informações da Loja</h3>
+                <h3 className="font-bold text-lg text-slate-900 border-b pb-3">Personalização da Sua Loja</h3>
                 
                 <div>
                   <label className="text-xs font-bold text-slate-700">Nome da Loja</label>
@@ -632,7 +659,34 @@
                     value={storeConfig.name}
                     onChange={e => setStoreConfig({ ...storeConfig, name: e.target.value })}
                     className="w-full mt-1 p-2.5 border border-slate-300 rounded-lg text-sm"
+                    placeholder="Digite o nome da sua boutique ou loja"
                   />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700">Foto / Logotipo da Loja</label>
+                  <div className="flex items-center gap-3 mt-2">
+                    <img 
+                      src={storeConfig.logoUrl} 
+                      alt="Prévia" 
+                      className="w-14 h-14 rounded-full object-cover border border-slate-300"
+                    />
+                    <div className="flex-1">
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 hover:file:bg-slate-200"
+                      />
+                      <input 
+                        type="url" 
+                        placeholder="Ou digite o link da imagem (URL)" 
+                        value={storeConfig.logoUrl}
+                        onChange={e => setStoreConfig({ ...storeConfig, logoUrl: e.target.value })}
+                        className="w-full mt-1.5 p-2 border border-slate-300 rounded-lg text-xs"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -657,27 +711,17 @@
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700">URL do Logotipo</label>
-                  <input 
-                    type="url" 
-                    value={storeConfig.logoUrl}
-                    onChange={e => setStoreConfig({ ...storeConfig, logoUrl: e.target.value })}
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-lg text-sm"
-                  />
-                </div>
-
-                <div>
                   <label className="text-xs font-bold text-slate-700">Chave Pix da Loja (Para clientes pagarem)</label>
                   <input 
                     type="text" 
                     value={storeConfig.pixKey}
                     onChange={e => setStoreConfig({ ...storeConfig, pixKey: e.target.value })}
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-lg text-sm"
+                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-lg text-sm font-mono"
                   />
                 </div>
 
                 <button 
-                  onClick={() => alert('Dados da loja atualizados com sucesso!')}
+                  onClick={() => alert('Dados e logotipo da loja salvos com sucesso!')}
                   className="w-full py-3 bg-slate-900 text-white rounded-lg font-bold text-sm hover:bg-slate-800 transition-colors"
                 >
                   Salvar Alterações
